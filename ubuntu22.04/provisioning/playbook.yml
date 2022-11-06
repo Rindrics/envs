@@ -3,3 +3,14 @@
   hosts: vagrants
   become: yes
   user: vagrant
+
+  tasks:
+    - name: Install Starship
+      ansible.builtin.shell:
+        cmd: curl -sSf https://starship.rs/install.sh | sh -s -- -y
+
+    - name: Add eval statement to .bashrc
+      lineinfile:
+        dest: /home/vagrant/.bashrc
+        line: "eval \"$(starship init bash)\""
+        owner: vagrant
