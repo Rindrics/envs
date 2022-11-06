@@ -1,6 +1,6 @@
 ---
 - name: Setup development environment
-  hosts: vagrants
+  hosts: devenv
   become: yes
   user: vagrant
 
