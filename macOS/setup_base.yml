@@ -1,0 +1,104 @@
+---
+- name: Set up basic packages on macOS
+  hosts: mac
+  become: yes
+  become_method: sudo
+  vars:
+    ansible_user_id: "{{ lookup('env', 'USER') }}"
+    homebrew_packages:
+      - git
+      - wget
+      - asdf
+      - direnv
+      - terraform
+      - starship
+      - awscli
+      - gh
+      - kubectl
+      - node
+    node_packages:
+      - npm
+      - yarn
+      - pnpm
+    zshrc_lines:
+      - 'eval "$(starship init zsh)"'
+      - '. $(brew --prefix asdf)/libexec/asdf.sh'
+    zprofile_lines:
+      - 'eval "$(/opt/homebrew/bin/brew shellenv)"'
+  tasks:
+
+    - name: Echo ansible_user_id
+      debug:
+        msg: "The ansible_user_id is {{ ansible_user_id }}"
+
+    - name: Install Xcode Command Line Tools
+      command: xcode-select --install
+      args:
+        creates: /Library/Developer/CommandLineTools
+
+    - name: Check if Homebrew is installed
+      command: /opt/homebrew/bin/brew --version
+      register: brew_installed
+      ignore_errors: true
+
+    - name: Install Homebrew
+      become: no
+      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      when: brew_installed.failed
+
+    - name: Ensure Homebrew is in the PATH in .zprofile
+      become: no
+      lineinfile:
+        path: /Users/{{ ansible_user_id }}/.zprofile
+        line: "{{ item }}"
+        create: yes
+      loop: "{{ zprofile_lines }}"
+
+    - name: Install Homebrew packages
+      become: no
+      command: "/opt/homebrew/bin/brew install {{ item }}"
+      loop: "{{ homebrew_packages }}"
+      loop_control:
+        label: "{{ item }}"
+      environment:
+        PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/{{ ansible_user_id }}/Library/Python/3.9/bin"
+
+    - name: Install npm packages with force if needed
+      become: no
+      command: "/opt/homebrew/bin/npm install --global {{ item }} --force"
+      loop: "{{ node_packages }}"
+      loop_control:
+        label: "{{ item }}"
+      environment:
+        PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/{{ ansible_user_id }}/Library/Python/3.9/bin"
+      ignore_errors: true
+
+    - name: Verify npm packages are installed
+      become: no
+      command: "/opt/homebrew/bin/npm list --global {{ item }}"
+      loop: "{{ node_packages }}"
+      loop_control:
+        label: "{{ item }}"
+      environment:
+        PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/{{ ansible_user_id }}/Library/Python/3.9/bin"
+
+    - name: Add lines to .zshrc
+      become: no
+      lineinfile:
+        path: /Users/{{ ansible_user_id }}/.zshrc
+        line: "{{ item }}"
+        create: yes
+      loop: "{{ zshrc_lines }}"
+      environment:
+        PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/{{ ansible_user_id }}/Library/Python/3.9/bin"
+
+    - name: Source .zprofile and .zshrc for user
+      become: no
+      shell: |
+        source /Users/{{ ansible_user_id }}/.zprofile
+        source /Users/{{ ansible_user_id }}/.zshrc
+      environment:
+        PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/{{ ansible_user_id }}/Library/Python/3.9/bin"
+      args:
+        executable: /bin/zsh
+
