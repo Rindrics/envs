@@ -16,6 +16,10 @@
       - gh
       - kubectl
       - node
+      - gnupg
+      - 1password-cli
+      - go
+      - goreleaser
     node_packages:
       - npm
       - yarn
@@ -102,3 +106,73 @@
       args:
         executable: /bin/zsh
 
+    - name: Install Google Japanese Input
+      become: no
+      homebrew_cask:
+        name: google-japanese-ime
+        state: present
+
+    - name: Install Spotify
+      become: no
+      homebrew_cask:
+        name: spotify
+        state: present
+
+    - name: Install Figma
+      become: no
+      homebrew_cask:
+        name: figma
+        state: present
+
+#    - name: Install SF Mono Square font
+#      become: no
+#      shell: |
+#        /opt/homebrew/bin/brew tap delphinus/sfmono-square
+#        /opt/homebrew/bin/brew install sfmono-square
+#      environment:
+#        PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/{{ ansible_user_id }}/Library/Python/3.9/bin"
+#
+    - name: Install Spotify
+      become: no
+      homebrew_cask:
+        name: spotify
+        state: present
+
+    - name: Install Figma
+      become: no
+      homebrew_cask:
+        name: figma
+        state: present
+
+    - name: Install Warp
+      become: no
+      homebrew_cask:
+        name: warp
+        state: present
+
+    - name: Install Raycast
+      become: no
+      homebrew_cask:
+        name: raycast
+        state: present
+
+    - name: Install Brave browser
+      become: no
+      homebrew_cask:
+        name: brave-browser
+        state: present
+
+
+#    - name: Install SF Mono Square font
+#      become: no
+#      shell: |
+#        /opt/homebrew/bin/brew tap delphinus/sfmono-square
+#        /opt/homebrew/bin/brew install sfmono-square
+#      environment:
+#        PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/{{ ansible_user_id }}/Library/Python/3.9/bin"
+#
+    - name: Install Hack Nerd Font
+      become: no
+      homebrew_cask:
+        name: font-hack-nerd-font
+        state: present
